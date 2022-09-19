@@ -1,4 +1,4 @@
-//node app.js ---------------------------------------------------------------------------------
+//node api.js ---------------------------------------------------------------------------------
 const client = require('./connection.js')
 const express = require('express');
 const app = express();
@@ -10,6 +10,11 @@ app.listen(4000, ()=>{
 })
 
 client.connect();
+
+
+
+
+// users requests --------------------------------------------------------------------------------------------------
 app.get('/users', (req, res)=>{
     client.query(`Select * from users`, (err, result)=>{
         if(!err){
@@ -60,6 +65,68 @@ app.put('/users/:id', (req, res)=> {
 
 app.delete('/users/:id', (req, res)=> {
     let insertQuery = `delete from users where id=${req.params.id}`
+
+    client.query(insertQuery, (err, result)=>{
+        if(!err){
+            res.send('Deletion was successful')
+        }
+        else{ console.log(err.message) }
+    })
+    client.end;
+})
+
+// events requests --------------------------------------------------------------------------------------------------
+app.get('/events', (req, res)=>{
+    client.query(`Select * from events`, (err, result)=>{
+        if(!err){
+            res.send(result.rows);
+        }
+    });
+    client.end;
+})
+
+app.get('/events/:id', (req, res)=>{
+    client.query(`Select * from events where id=${req.params.id}`, (err, result)=>{
+        if(!err){
+            res.send(result.rows );
+        }
+    });
+    client.end;
+})
+
+app.post('/events', (req, res)=> {
+    const event = req.body;
+    let insertQuery = `insert into events(id, creator_id, second_user_id, place, date, climbing_level, training_length, is_active) 
+                       values(${event.id}, '${event.creator_id}', '${event.second_user_id}', '${event.place}', '${event.date}'
+                       , '${event.climbing_level}', '${event.training_length}', '${event.is_active}')`
+
+    client.query(insertQuery, (err, result)=>{
+        if(!err){
+            res.send('Insertion was successful')
+        }
+        else{ console.log(err.message) }
+    })
+    client.end;
+})
+
+app.put('/events/:id', (req, res)=> {
+    let event = req.body;
+    let updateQuery = `update events
+                       set is_active = '${event.is_active}'
+                       
+                       where id = ${event.id}`
+
+    client.query(updateQuery, (err, result)=>{
+        if(!err){
+            res.send('Update was successful')
+        }
+        else{ console.log(err.message) }
+    })
+    client.end;
+})
+
+app.delete('/events/:id', (req, res)=> {
+    let insertQuery = `delete from events where id=${req.params.id}`
 
     client.query(insertQuery, (err, result)=>{
         if(!err){
